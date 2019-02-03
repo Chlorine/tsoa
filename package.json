@@ -23,7 +23,7 @@
     "install": "npm run build",
     "copy-types": "copyfiles -u 1 ./src/*.d.ts ./dist",
     "copy-templates": "copyfiles -u 1 ./src/routeGeneration/templates/**/* ./dist",
-    "clean": "rimraf dist && rimraf tests/fixtures/*/routes.ts",
+    "clean": "npx rimraf dist && npx rimraf tests/fixtures/*/routes.ts",
     "lint": "tslint --exclude ./node_modules/** ./src/**/*.ts ./tests/**/*.ts",
     "format": "tsfmt -r",
     "prepare": "npm run build",
@@ -49,7 +49,7 @@
     "validator": "^8.2.0",
     "yamljs": "^0.3.0",
     "yargs": "^8.0.2",
-    "rimraf": "^2.6.2"
+    "rimraf": "^2.6.3"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
