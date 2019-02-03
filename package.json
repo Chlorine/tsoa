@@ -19,7 +19,6 @@
   "scripts": {
     "start": "tsc -w",
     "build": "npm run clean && npm run tsc && npm run copy-templates && npm run copy-types",
-    "preinstall": "npm install && npm run build",
     "install": "npm run build",
     "copy-types": "copyfiles -u 1 ./src/*.d.ts ./dist",
     "copy-templates": "copyfiles -u 1 ./src/routeGeneration/templates/**/* ./dist",
@@ -48,7 +47,8 @@
     "typescript-formatter": "^7.2.2",
     "validator": "^8.2.0",
     "yamljs": "^0.3.0",
-    "yargs": "^8.0.2"
+    "yargs": "^8.0.2",
+    "rimraf": "^2.6.2"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
@@ -84,7 +84,6 @@
     "method-override": "^2.3.10",
     "mocha": "^5.2.0",
     "reflect-metadata": "^0.1.12",
-    "rimraf": "^2.6.2",
     "supertest": "^3.1.0",
     "ts-node": "^3.3.0",
     "tslint": "^5.11.0"
