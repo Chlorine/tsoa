@@ -19,6 +19,7 @@
   "scripts": {
     "start": "tsc -w",
     "build": "npm run clean && npm run tsc && npm run copy-templates && npm run copy-types",
+    "preinstall": "npm run build",
     "install": "npm run build",
     "copy-types": "copyfiles -u 1 ./src/*.d.ts ./dist",
     "copy-templates": "copyfiles -u 1 ./src/routeGeneration/templates/**/* ./dist",
