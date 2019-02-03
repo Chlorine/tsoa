@@ -1,8 +1,8 @@
 /* tslint:disable */
 {{#if canImportByAlias}}
-  import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute } from 'tsoa';
+  import { Controller, KoaController, ValidationService, FieldErrors, ValidateError, TsoaRoute } from 'tsoa';
 {{else}}
-  import { Controller, ValidationService, FieldErrors, ValidateError, TsoaRoute } from '../../../src';
+  import { Controller, KoaController, ValidationService, FieldErrors, ValidateError, TsoaRoute } from '../../../src';
 {{/if}}
 {{#if iocModule}}
 import { iocContainer } from '{{iocModule}}';
@@ -50,20 +50,38 @@ export function RegisterRoutes(router: KoaRouter) {
                 {{/each}}
             };
 
-            let validatedArgs: any[] = [];
-            try {
-              validatedArgs = getValidatedArgs(args, context);
-            } catch (error) {
-              context.status = error.status;
-              context.throw(error.status, JSON.stringify({ fields: error.fields }));
-              return next();
-            }
-
             {{#if ../../iocModule}}
             const controller = iocContainer.get<{{../name}}>({{../name}});
             {{else}}
             const controller = new {{../name}}();
             {{/if}}
+
+            let validatedArgs: any[] = [];
+            try {
+              validatedArgs = getValidatedArgs(args, context);
+            } catch (error) {
+
+                if(isKoaController(controller)) {
+
+                    const controllerResponse = controller.onParamsValidationError(context, error);
+
+                    if(controllerResponse.body) {
+                        context.body = controllerResponse.body;
+                    }
+
+                    context.status = controllerResponse.status;
+
+                    // @ts-ignore
+                    context.throw(controllerResponse.status, controllerResponse.errorMessage);
+
+                    return next();
+                }
+
+                context.status = error.status || 400;
+
+                context.throw(error.status, JSON.stringify({ fields: error.fields }));
+                return next();
+            }
 
             const promise = controller.{{name}}.apply(controller, validatedArgs as any);
             return promiseHandler(controller, promise, context, next);
@@ -122,6 +140,10 @@ export function RegisterRoutes(router: KoaRouter) {
       return 'getHeaders' in object && 'getStatus' in object && 'setStatus' in object;
   }
 
+  function isKoaController(object: any): object is KoaController {
+      return isController(object) && 'onParamsValidationError' in object && 'onExecutionError' in object;
+  }
+
   function promiseHandler(controllerObj: any, promise: Promise<any>, context: any, next: () => Promise<any>) {
       return Promise.resolve(promise)
         .then((data: any) => {
@@ -146,7 +168,21 @@ export function RegisterRoutes(router: KoaRouter) {
             return next();
         })
         .catch((error: any) => {
-            context.status = error.status;
+
+            if(isKoaController(controllerObj)) {
+                const controllerResponse = controllerObj.onExecutionError(context, error);
+                if (controllerResponse.body) {
+                    context.body = controllerResponse.body;
+                }
+                context.status = controllerResponse.status;
+
+                // @ts-ignore
+                context.throw(controllerResponse.status, controllerResponse.errorMessage);
+
+                return next();
+            }
+
+            context.status = error.status || 500;
             context.throw(error.status, error.message, error);
             return next();
         });
@@ -154,13 +190,18 @@ export function RegisterRoutes(router: KoaRouter) {
 
     function getValidatedArgs(args: any, context: any): any[] {
         const errorFields: FieldErrors = {};
+        let paramFromQuery: any;
         const values = Object.keys(args).map(key => {
             const name = args[key].name;
             switch (args[key].in) {
             case 'request':
                 return context.request;
             case 'query':
-                return validationService.ValidateParam(args[key], context.request.query[name], name, errorFields);
+                paramFromQuery = validationService.ValidateParam(args[key], context.request.query[name], name, errorFields);
+                if (paramFromQuery && args[key].dataType === 'string' && typeof paramFromQuery === 'string' ) {
+                  paramFromQuery = decodeURIComponent(paramFromQuery);
+                }
+                return paramFromQuery;
             case 'path':
                 return validationService.ValidateParam(args[key], context.params[name], name, errorFields);
             case 'header':
