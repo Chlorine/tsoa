@@ -1,6 +1,6 @@
 /* tslint:disable */
 {{#if canImportByAlias}}
-  import { Controller, KoaController, ValidationService, FieldErrors, ValidateError, TsoaRoute } from 'tsoa';
+  import { Controller, KoaController, ValidationService, FieldErrors, ValidateError, TsoaRoute } from 'tsoa-chlorine';
 {{else}}
   import { Controller, KoaController, ValidationService, FieldErrors, ValidateError, TsoaRoute } from '../../../src';
 {{/if}}

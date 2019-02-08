@@ -1,9 +1,12 @@
 {
-  "name": "tsoa",
+  "name": "tsoa-chlorine",
   "description": "Build swagger-compliant REST APIs using TypeScript and Node",
   "version": "2.3.8",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "keywords": [
     "typescript",
     "swagger",
@@ -19,10 +22,8 @@
   "scripts": {
     "start": "tsc -w",
     "build": "npm run clean && npm run tsc && npm run copy-templates && npm run copy-types",
-    "preinstall": "npm run build",
-    "install": "npm run build",
-    "copy-types": "npx copyfiles -u 1 ./src/*.d.ts ./dist",
-    "copy-templates": "npx copyfiles -u 1 ./src/routeGeneration/templates/**/* ./dist",
+    "copy-types": "copyfiles -u 1 ./src/*.d.ts ./dist",
+    "copy-templates": "copyfiles -u 1 ./src/routeGeneration/templates/**/* ./dist",
     "clean": "npx rimraf dist && npx rimraf tests/fixtures/*/routes.ts",
     "lint": "tslint --exclude ./node_modules/** ./src/**/*.ts ./tests/**/*.ts",
     "format": "tsfmt -r",
@@ -48,9 +49,7 @@
     "typescript-formatter": "^7.2.2",
     "validator": "^8.2.0",
     "yamljs": "^0.3.0",
-    "yargs": "^8.0.2",
-    "rimraf": "^2.6.3",
-    "copyfiles": "^1.2.0"
+    "yargs": "^8.0.2"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
